@@ -24,7 +24,11 @@ public class MultiplayerEnemyPatrol : NetworkBehaviour
         if (!IsServer)
         {
             this.enabled = false;
+            return;
         }
+        
+        waypoints = GameObject.FindGameObjectWithTag("WaypointContainer").transform.GetComponentsInChildren<Transform>();
+        
     }
 
     void Update()

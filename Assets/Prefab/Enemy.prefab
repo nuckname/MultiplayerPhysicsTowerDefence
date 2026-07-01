@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 9041590974175281397}
   - component: {fileID: 455932567200197394}
   - component: {fileID: 4166238898343007443}
+  - component: {fileID: 4561673011796389618}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Untagged
@@ -127,7 +128,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 1946150824
+  GlobalObjectIdHash: 3265735099
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -203,3 +204,16 @@ MonoBehaviour:
   moveSpeed: 5
   waypointTolerance: 0.5
   rotationSpeed: 5
+--- !u!114 &4561673011796389618
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6103095402289636404}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2450f069dc42e489aa669e4fe5ce3b17, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyTracker
+  ShowTopMostFoldoutHeaderGroup: 1

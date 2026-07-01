@@ -14,14 +14,30 @@ public class EnemySpawner : NetworkBehaviour
     public float spawnInterval = 5f;
 
     private float timer = 0f;
-
     public bool canSpawnEnemies = false;
+
+    // --- NEW VARIABLES FOR ROUND LOGIC ---
+    private int enemiesToSpawnThisRound = 0;
+    private int enemiesSpawnedSoFar = 0;
+
+    // Helper property so the FSM knows when the spawner is done
+    public bool HasFinishedSpawning => enemiesSpawnedSoFar >= enemiesToSpawnThisRound;
+
+    // Called by the FSM to kick off a wave
+    public void StartSpawningForRound(int amountToSpawn)
+    {
+        enemiesToSpawnThisRound = amountToSpawn;
+        enemiesSpawnedSoFar = 0;
+        timer = 0f; // Reset timer so the first spawn happens predictably
+        canSpawnEnemies = true;
+    }
+
     void Update()
     {
         // Safety check: ONLY the server is allowed to spawn networked objects.
         // If a client runs this, we just ignore it.
         if (!IsServer) return;
-        if(!canSpawnEnemies) return;
+        if (!canSpawnEnemies) return;
         
         // Simple timer to spawn enemies continuously
         timer += Time.deltaTime;
@@ -49,5 +65,15 @@ public class EnemySpawner : NetworkBehaviour
         // Grab the NetworkObject and broadcast the spawn to all clients
         NetworkObject netObj = spawnedEnemy.GetComponent<NetworkObject>();
         netObj.Spawn(true); 
+
+        // --- NEW LOGIC: Track spawns and tell the State Manager ---
+        enemiesSpawnedSoFar++;
+        RoundStateManager.Instance.activeEnemyCount++;
+
+        // Stop the spawner if we reached the limit for this round
+        if (enemiesSpawnedSoFar >= enemiesToSpawnThisRound)
+        {
+            canSpawnEnemies = false;
+        }
     }
 }

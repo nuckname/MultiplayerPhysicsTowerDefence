@@ -4,16 +4,17 @@ public class RoundInProgressState : RoundBaseState
 {
     public override void EnterState(RoundStateManager stateManager)
     {
-        Debug.Log("Round Started!");
-        
-        // CLIENT & SERVER: Update UI to show "Wave Started"
-        // UIManager.Instance.ShowWaveStarted();
+        Debug.Log($"Round {stateManager.currentRound.Value} Started!");
 
         if (stateManager.IsServer)
         {
-            // SERVER ONLY: Start the enemy spawners
-            Debug.Log("Server is starting the spawners.");
-            stateManager.enemySpawner.canSpawnEnemies = true;
+            // Configure how many enemies spawn this round. 
+            int amountToSpawn = stateManager.currentRound.Value * 5; 
+            
+            if (stateManager.Spawner != null)
+            {
+                stateManager.Spawner.StartSpawningForRound(amountToSpawn);
+            }
         }
     }
 
@@ -21,29 +22,27 @@ public class RoundInProgressState : RoundBaseState
     {
         if (!stateManager.IsServer) return; 
 
-        // SERVER ONLY: Check win/loss conditions every frame
-        // Example: If base health <= 0, tell everyone the round is over
-        // if (baseHealth <= 0) 
-        // {
-        //     stateManager.ServerSwitchState(RoundPhase.Over);
-        // }
+        // WIN CONDITION: Spawner is empty AND all enemies on the map are dead
+        if (stateManager.Spawner.HasFinishedSpawning && stateManager.activeEnemyCount <= 0)
+        {
+            Debug.Log("All enemies defeated! Wave cleared.");
+            stateManager.ServerSwitchState(RoundPhase.Over);
+        }
     }
 
     public override void ExitState(RoundStateManager stateManager)
     {
-        Debug.Log("Round Finished. Cleaning up active round elements.");
-        // Logic to disable spawners, stop round timer, etc.
+        if (stateManager.IsServer)
+        {
+            if (stateManager.Spawner != null)
+            {
+                stateManager.Spawner.canSpawnEnemies = false;
+            }
+        }
     }
 
     public override void OnCollisionEnter2D(RoundStateManager stateManager, Collision2D other)
     {
-        if (!stateManager.IsServer) return;
-
-        // SERVER ONLY: Detect if an enemy hits the base during the round
-        if (other.gameObject.CompareTag("Enemy"))
-        {
-            Debug.Log("Base took damage!");
-            // Calculate damage here
-        }
+        // Base damage logic goes here
     }
 }

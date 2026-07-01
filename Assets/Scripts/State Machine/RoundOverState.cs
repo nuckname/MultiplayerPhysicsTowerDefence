@@ -1,17 +1,22 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class RoundOverState : RoundBaseState
 {
     public override void EnterState(RoundStateManager stateManager)
     {
-        Debug.Log("Round Over!");
+        Debug.Log($"Round Over State!");
         
-        // CLIENT & SERVER: Show victory/defeat UI, tally score
-        // UIManager.Instance.ShowGameOverScreen();
-
-        if (stateManager.IsServer)
+        // Check if they beat the final round
+        if (stateManager.currentRound.Value >= stateManager.maxRounds)
         {
-            stateManager.enemySpawner.canSpawnEnemies = false;
+            Debug.Log("Game Complete! You beat all rounds.");
+            // Trigger game win UI
+        }
+        else
+        {
+            Debug.Log("Round Over! Press Space to start next wave.");
+            // Trigger between-round UI
         }
     }
 
@@ -19,21 +24,22 @@ public class RoundOverState : RoundBaseState
     {
         if (!stateManager.IsServer) return;
 
-        // SERVER ONLY: Wait for server host to press a button to restart
-        // if (Input.GetKeyDown(KeyCode.Space)) 
-        // { 
-        //     stateManager.ServerSwitchState(RoundPhase.InProgress); 
-        // }
+        // If not max round, wait for input to progress
+        if (stateManager.currentRound.Value < stateManager.maxRounds)
+        {
+            // Example: Press Space to start the next round
+            if (Keyboard.current.spaceKey.wasPressedThisFrame) 
+            { 
+                stateManager.currentRound.Value++; // Increment round network variable
+                stateManager.ServerSwitchState(RoundPhase.InProgress); 
+            }
+        }
     }
 
     public override void ExitState(RoundStateManager stateManager)
     {
-        Debug.Log("Hiding summary screen, preparing for new round.");
-        // CLIENT & SERVER: Hide UI menus
+        // Hide UI
     }
 
-    public override void OnCollisionEnter2D(RoundStateManager stateManager, Collision2D other)
-    {
-        // Ignore collisions while the round is over
-    }
+    public override void OnCollisionEnter2D(RoundStateManager stateManager, Collision2D other) { }
 }

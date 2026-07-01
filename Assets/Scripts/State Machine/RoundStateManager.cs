@@ -3,11 +3,28 @@ using Unity.Netcode;
 
 public class RoundStateManager : NetworkBehaviour
 {
+    // SINGLETON SETUP FOR EASY ACCESS
+    public static RoundStateManager Instance { get; private set; }
+
     // Instantiate all possible states here so they stay in memory and don't need recreating
     public RoundInProgressState roundInProgressState = new RoundInProgressState();
     public RoundOverState roundOverState = new RoundOverState();
 
-    public EnemySpawner enemySpawner;
+    [SerializeField] private EnemySpawner enemySpawner;
+    public EnemySpawner Spawner => enemySpawner; 
+
+    [Header("Round Settings")]
+    public int maxRounds = 10;
+    
+    // Server updates this, clients read it for the UI
+    public NetworkVariable<int> currentRound = new NetworkVariable<int>(
+        1, 
+        NetworkVariableReadPermission.Everyone, 
+        NetworkVariableWritePermission.Server
+    );
+
+    // Server-only variable to track how many enemies are currently alive in the scene
+    public int activeEnemyCount = 0;
     
     // The NetworkVariable holds the current state Enum. 
     // Everyone can read it, but ONLY the server can change it.
@@ -19,6 +36,13 @@ public class RoundStateManager : NetworkBehaviour
 
     // Tracks the current active state locally for the FSM logic
     private RoundBaseState currentState;
+
+    private void Awake()
+    {
+        // Simple singleton assignment
+        if (Instance == null) { Instance = this; } 
+        else { Destroy(gameObject); }
+    }
 
     public override void OnNetworkSpawn()
     {
